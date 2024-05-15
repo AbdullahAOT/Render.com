@@ -122,46 +122,12 @@ function trendingPageHandler(req, res) {
 }
 
 function searchPageHandler(req, res) {
-    let movieNameToSearchFor = req.query.movieName;
+    const movieNameToSearchFor = req.query.movieNameToSearchFor;
     const apiKey = process.env.API_Key;
-    let axiosPromises = [];
-    let foundMovie = false;
-
-    for (let i = 1; i <= 500 && !foundMovie; i++) {
-        let searchEndpoint = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(movieNameToSearchFor)}&page=${i}`;
-        axiosPromises.push(
-            axios.get(searchEndpoint)
-                .then(searchResponse => {
-                    const foundMovies = searchResponse.data.results.filter(specificInformationMovie => (specificInformationMovie.title).toLowerCase() === movieNameToSearchFor.toLowerCase());
-                    if (foundMovies.length > 0) {
-                        foundMovie = true;
-                        return foundMovies[0];
-                    } else {
-                        return null;
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    return null;
-                })
-        );
-    }
-
-    Promise.all(axiosPromises)
-        .then(resultMoviesArray => {
-            const foundMovie = resultMoviesArray.find(movie => movie !== null);
-            if (foundMovie) {
-                let movieToDisplay = new Movie(foundMovie.title, foundMovie.poster_path, foundMovie.overview);
-                res.send(movieToDisplay);
-            }
-            else {
-                res.status(404).send("Movie not found");
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            res.status(500).send("Internal server error");
-        });
+    axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(movieNameToSearchFor)}&page=1`)
+    .then(data=>{
+        res.send(data);
+    })
 }
 
 function nowPlayingPageHandler(req, res) {
