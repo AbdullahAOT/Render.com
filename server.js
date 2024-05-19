@@ -8,7 +8,6 @@ const readline = require("readline");
 const { Server } = require("http");
 app.use(express.json());
 
-const client1 = new pg.Client('postgresql://localhost:5432/movies');
 const Database = process.env.PG_DATABASE
 const UserName = process.env.PG_USER
 const password = process.env.PG_PASSWORD
@@ -47,7 +46,7 @@ app.get("/get_movie/:id", getMovieHandler);
 
 function getMoviesHandler(req, res) {
     const sql = "SELECT * FROM movies";
-    client1.query(sql)
+    client.query(sql)
         .then(data => {
             res.send(data.rows);
         })
@@ -60,7 +59,7 @@ function addMovieHandler(req, res) {
     const movieToAdd = req.body;
     const sql = "INSERT INTO movies (title, summary) VALUES ($1, $2) RETURNING *";
     const values = [movieToAdd.title, movieToAdd.summary];
-    client1.query(sql, values)
+    client.query(sql, values)
         .then(data => {
             res.send("Your movie was added succesfully");
         })
@@ -73,7 +72,7 @@ function updateMovieHandler(req, res) {
     const movieId = req.params.id;
     const sql = `UPDATE movies SET title = $1, summary=$2 WHERE id = ${movieId} RETURNING *`;
     const values = [req.body.title, req.body.summary];
-    client1.query(sql, values)
+    client.query(sql, values)
         .then(data => {
             res.status(200).send(data.rows);
         })
@@ -85,7 +84,7 @@ function updateMovieHandler(req, res) {
 function deleteMovieHandler(req, res) {
     const movieId = req.params.id;
     const sql = `DELETE FROM movies where id=${movieId}`;
-    client1.query(sql)
+    client.query(sql)
         .then(data => {
             res.status(204).json({});
         })
@@ -97,7 +96,7 @@ function deleteMovieHandler(req, res) {
 function getMovieHandler(req, res) {
     const movieId = req.params.id;
     const sql = `SELECT * FROM movies WHERE id = ${movieId}`;
-    client1.query(sql)
+    client.query(sql)
         .then(data => {
             res.status(200).send(data.rows);
         })
